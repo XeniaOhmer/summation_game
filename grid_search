@@ -1,6 +1,6 @@
 {
   "N": [20],
-  "n_epochs": [1],
+  "n_epochs": [150],
   "batch_size": [32],
   "lr": [0.001],
   "n_symbols": [100],
