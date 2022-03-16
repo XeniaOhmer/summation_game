@@ -24,15 +24,15 @@ def get_params(params):
     parser.add_argument("--N", type=int, default=20, help="Maximal value of summands")
     parser.add_argument("--test_split", type=float, default=0.1, help="proportion of test set samples")
     parser.add_argument("--data_scaling", type=int, default=50, help="number of occurrences of training samples")
-    parser.add_argument("--one_hot", type=bool, default=False, help="whether data is one-hot encoded"),
+    parser.add_argument("--one_hot", type=bool, default=True, help="whether data is one-hot encoded"),
     # agents and game
-    parser.add_argument("--receiver_embed_dim", type=int, default=100,
+    parser.add_argument("--receiver_embed_dim", type=int, default=128,
                         help="embedding dimension for generated symbol")
-    parser.add_argument("--n_layers", type=int, default=1)
+    parser.add_argument("--n_layers", type=int, default=2)
     parser.add_argument("--n_symbols", type=int, default=100, help="number of symbols")
     # training
-    parser.add_argument("--temperature", type=float, default=1.5, help="GS temperature for the sender")
-    parser.add_argument("--temp_decay", type=float, default=0.995, help="temperature decay")
+    parser.add_argument("--temperature", type=float, default=2.0, help="GS temperature for the sender")
+    parser.add_argument("--temp_decay", type=float, default=0.99, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
     parser.add_argument("--save_interactions", default=False, action="store_true", help="whether to save interactions")
     parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
