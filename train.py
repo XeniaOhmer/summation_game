@@ -1,9 +1,6 @@
 # add command line params
 # --lr: learning rate 0.001 (default: 0.01)
-# --random_seed: 42 (default: None)
 # --n_epochs: 150 (default: 10)
-# --tensorboard (default: False)
-# --tensorboard_dir (default: 'run/')
 
 import argparse
 import os
@@ -34,25 +31,21 @@ def get_params(params):
     parser.add_argument("--n_layers", type=int, default=1)
     parser.add_argument("--n_symbols", type=int, default=100, help="number of symbols")
     # training
-    parser.add_argument("--temperature", type=float, default=1.2, help="GS temperature for the sender")
+    parser.add_argument("--temperature", type=float, default=1.5, help="GS temperature for the sender")
     parser.add_argument("--temp_decay", type=float, default=0.995, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
     parser.add_argument("--save_interactions", default=False, action="store_true", help="whether to save interactions")
     parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
+    parser.add_argument("--tensorboard_logger", default=False, action="store_true",
+                        help="whether to log training with tensorboard")
+
     args = core.init(parser, params)
     return args
 
 
-def run(opts, save_dir):
+def run(opts, save_path):
 
     print(opts, flush=True)
-
-    latest_run = len(os.listdir(save_dir))
-    save_path = os.path.join(save_dir, str(latest_run)) + '/'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-    if opts.tensorboard:
-        opts.tensorboard_dir = save_path + 'checkpoints/'
 
     pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
 
@@ -116,6 +109,11 @@ def run(opts, save_dir):
         callbacks.append(core.callbacks.InteractionSaver(train_epochs=[opts.n_epochs],
                                                          test_epochs=[opts.n_epochs],
                                                          checkpoint_dir=save_path))
+    if opts.tensorboard_logger:
+        # this creates a new writer for each run
+        from torch.utils.tensorboard import SummaryWriter
+        summary_writer = SummaryWriter(log_dir=save_path)
+        callbacks.append(core.callbacks.TensorboardLogger(writer=summary_writer))
 
     trainer = core.Trainer(
         game=game,
@@ -151,7 +149,11 @@ def main(params):
         os.makedirs(save_dir)
 
     for i in range(opts.n_runs):
-        run(opts, save_dir=save_dir)
+        latest_run = len(os.listdir(save_dir))
+        save_path = os.path.join(save_dir, str(latest_run)) + '/'
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        run(opts, save_path)
 
 
 if __name__ == "__main__":
