@@ -1,0 +1,13 @@
+{
+  "N": [20],
+  "n_epochs": [150],
+  "batch_size": [32],
+  "lr": [0.001],
+  "n_runs": [1],
+  "receiver_embed_dim": [128],
+  "temperature": [2],
+  "temp_decay": [1],
+  "one_hot": ["false"],
+  "n_layers": [3],
+  "n_symbols": [40, 100, 200, 400]
+}
