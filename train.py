@@ -34,9 +34,9 @@ def get_params(params):
     parser.add_argument("--temperature", type=float, default=2.0, help="GS temperature for the sender")
     parser.add_argument("--temp_decay", type=float, default=1.0, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
-    parser.add_argument("--save_interactions", default=False, action="store_true", help="whether to save interactions")
+    parser.add_argument("--save_interactions", default=True, action="store_true", help="whether to save interactions")
     parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
-    parser.add_argument("--tensorboard_logger", default=False, action="store_true",
+    parser.add_argument("--tensorboard_logger", default=True, action="store_true",
                         help="whether to log training with tensorboard")
 
     args = core.init(parser, params)
