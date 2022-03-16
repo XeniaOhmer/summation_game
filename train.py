@@ -1,11 +1,10 @@
 # add command line params
 # --lr: learning rate 0.001 (default: 0.01)
-# --random_seed: 42 (default: None)
 # --n_epochs: 150 (default: 10)
-# --tensorboard (default: False)
-# --tensorboard_dir (default: 'run/')
 
 import argparse
+import os
+import pickle
 
 import torch
 import torch.nn.functional as F
@@ -32,17 +31,23 @@ def get_params(params):
     parser.add_argument("--n_layers", type=int, default=1)
     parser.add_argument("--n_symbols", type=int, default=100, help="number of symbols")
     # training
-    parser.add_argument("--temperature", type=float, default=1.2, help="GS temperature for the sender")
+    parser.add_argument("--temperature", type=float, default=1.5, help="GS temperature for the sender")
     parser.add_argument("--temp_decay", type=float, default=0.995, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
+    parser.add_argument("--save_interactions", default=False, action="store_true", help="whether to save interactions")
+    parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
+    parser.add_argument("--tensorboard_logger", default=False, action="store_true",
+                        help="whether to log training with tensorboard")
+
     args = core.init(parser, params)
     return args
 
 
-def main(params):
+def run(opts, save_path):
 
-    opts = get_params(params)
     print(opts, flush=True)
+
+    pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
 
     def loss(sender_input, _message, _receiver_input, receiver_output, _labels, _aux_input):
         # cross-entropy loss between true sum and receiver output
@@ -100,6 +105,15 @@ def main(params):
     callbacks = [core.ConsoleLogger(print_train_loss=True),
                  core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.75),
                  core.EarlyStopperAccuracy(opts.early_stopping_acc)]
+    if opts.save_interactions:
+        callbacks.append(core.callbacks.InteractionSaver(train_epochs=[opts.n_epochs],
+                                                         test_epochs=[opts.n_epochs],
+                                                         checkpoint_dir=save_path))
+    if opts.tensorboard_logger:
+        # this creates a new writer for each run
+        from torch.utils.tensorboard import SummaryWriter
+        summary_writer = SummaryWriter(log_dir=save_path)
+        callbacks.append(core.callbacks.TensorboardLogger(writer=summary_writer))
 
     trainer = core.Trainer(
         game=game,
@@ -112,6 +126,34 @@ def main(params):
     # train
 
     trainer.train(n_epochs=opts.n_epochs)
+
+    # test
+
+    test_loader = DataLoader(test, batch_size=opts.batch_size)
+    test_loss, test_interaction = trainer.eval(data=test_loader)
+    if opts.save_interactions:
+        core.InteractionSaver.dump_interactions(test_interaction,
+                                                dump_dir=save_path+'interactions/',
+                                                mode='test',
+                                                epoch=opts.n_epochs,
+                                                rank=0)
+
+
+def main(params):
+
+    opts = get_params(params)
+    print(opts, flush=True)
+
+    save_dir = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    for i in range(opts.n_runs):
+        latest_run = len(os.listdir(save_dir))
+        save_path = os.path.join(save_dir, str(latest_run)) + '/'
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        run(opts, save_path)
 
 
 if __name__ == "__main__":
