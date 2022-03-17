@@ -9,5 +9,7 @@
   "temp_decay": [0.995],
   "one_hot": ["false"],
   "n_layers": [2],
+  "tensorboard_logger": ["true"],
+  "save_interactions": ["true"],
   "n_symbols": [40, 100, 200, 400]
 }
