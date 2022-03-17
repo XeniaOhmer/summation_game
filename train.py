@@ -15,6 +15,7 @@ from egg.core.gs_wrappers import SymbolGameGS, SymbolReceiverWrapper, GumbelSoft
 
 from data import ScaledDataset, enumerate_attribute_value, one_hotify, split_train_test
 from architectures import Sender, Receiver
+from utils.training_helpers import InteractionSaverLocal
 
 
 def get_params(params):
@@ -24,7 +25,7 @@ def get_params(params):
     parser.add_argument("--N", type=int, default=20, help="Maximal value of summands")
     parser.add_argument("--test_split", type=float, default=0.1, help="proportion of test set samples")
     parser.add_argument("--data_scaling", type=int, default=50, help="number of occurrences of training samples")
-    parser.add_argument("--one_hot", type=bool, default=False, help="whether data is one-hot encoded"),
+    parser.add_argument("--one_hot", type=int, default=0, help="whether data is one-hot encoded"),
     # agents and game
     parser.add_argument("--receiver_embed_dim", type=int, default=128,
                         help="embedding dimension for generated symbol")
@@ -33,11 +34,10 @@ def get_params(params):
     # training
     parser.add_argument("--temperature", type=float, default=2.0, help="GS temperature for the sender")
     parser.add_argument("--temp_decay", type=float, default=1.0, help="temperature decay")
-    parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
-    parser.add_argument("--save_interactions", type=bool, default=False, help="whether to save interactions")
+    parser.add_argument("--early_stopping_acc", type=float, default=0.01, help="accuracy for early stopping")
     parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
-    parser.add_argument("--tensorboard_logger", type=bool, default=False,
-                        help="whether to log training with tensorboard")
+    parser.add_argument("--save_run", type=int, default=0,
+                        help="if True: store params, interactions, and tensorboard log files")
 
     args = core.init(parser, params)
     return args
@@ -45,9 +45,13 @@ def get_params(params):
 
 def run(opts, save_path):
 
+    opts.one_hot = bool(opts.one_hot)
+    opts.save_run = bool(opts.save_run)
     print(opts, flush=True)
 
-    if opts.save_interactions:
+    if opts.save_run:
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
 
     def loss(sender_input, _message, _receiver_input, receiver_output, _labels, _aux_input):
@@ -106,11 +110,10 @@ def run(opts, save_path):
     callbacks = [core.ConsoleLogger(print_train_loss=True),
                  core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.75),
                  core.EarlyStopperAccuracy(opts.early_stopping_acc)]
-    if opts.save_interactions:
-        callbacks.append(core.callbacks.InteractionSaver(train_epochs=None,
-                                                         test_epochs=[opts.n_epochs],
-                                                         checkpoint_dir=save_path))
-    if opts.tensorboard_logger:
+    if opts.save_run:
+        callbacks.append(InteractionSaverLocal(train_epochs=[opts.n_epochs],
+                                               test_epochs=[opts.n_epochs],
+                                               checkpoint_dir=save_path))
         # this creates a new writer for each run
         from torch.utils.tensorboard import SummaryWriter
         summary_writer = SummaryWriter(log_dir=save_path)
@@ -132,8 +135,8 @@ def run(opts, save_path):
 
     test_loader = DataLoader(test, batch_size=opts.batch_size)
     test_loss, test_interaction = trainer.eval(data=test_loader)
-    if opts.save_interactions:
-        core.InteractionSaver.dump_interactions(test_interaction,
+    if opts.save_run:
+        InteractionSaverLocal.dump_interactions(test_interaction,
                                                 dump_dir=save_path+'interactions/',
                                                 mode='test',
                                                 epoch=opts.n_epochs,
@@ -145,16 +148,12 @@ def main(params):
     opts = get_params(params)
     print(opts, flush=True)
 
-    save_dir = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-
+    if opts.save_run:
+        save_dir = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
+    else:
+        save_dir = None
     for i in range(opts.n_runs):
-        latest_run = len(os.listdir(save_dir))
-        save_path = os.path.join(save_dir, str(latest_run)) + '/'
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        run(opts, save_path)
+        run(opts, save_dir)
 
 
 if __name__ == "__main__":
