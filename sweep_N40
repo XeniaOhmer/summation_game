@@ -9,5 +9,5 @@
   "one_hot": [1],
   "n_layers": [3],
   "save_run": [1],
-  "n_symbols": [80, 160, 320, 640]
+  "n_symbols": [81, 162, 324, 648]
 }
