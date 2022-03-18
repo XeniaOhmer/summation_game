@@ -1,6 +1,6 @@
 {
   "N": [80],
-  "n_epochs": [250],
+  "n_epochs": [300],
   "batch_size": [32],
   "lr": [0.001],
   "receiver_embed_dim": [64],
