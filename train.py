@@ -33,8 +33,8 @@ def get_params(params):
     parser.add_argument("--n_layers", type=int, default=3)
     parser.add_argument("--n_symbols", type=int, default=100, help="number of symbols")
     # training
-    parser.add_argument("--temperature", type=float, default=1.5, help="GS temperature for the sender")
-    parser.add_argument("--temp_decay", type=float, default=1.0, help="temperature decay")
+    parser.add_argument("--temperature", type=float, default=2.0, help="GS temperature for the sender")
+    parser.add_argument("--temp_decay", type=float, default=0.995, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
     parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
     parser.add_argument("--save_run", type=int, default=0,
@@ -114,7 +114,7 @@ def main(params):
     callbacks = [core.ConsoleLogger(print_train_loss=True),
                  core.EarlyStopperAccuracy(opts.early_stopping_acc)]
     if opts.temp_decay != 1:
-        callbacks.extend([core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.75)])
+        callbacks.extend([core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.9)])
     if opts.save_run:
         callbacks.append(InteractionSaverLocal(train_epochs=[opts.n_epochs],
                                                test_epochs=[opts.n_epochs],
