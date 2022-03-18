@@ -63,7 +63,7 @@ def main(params):
         if opts.one_hot:
             labels = torch.zeros(sender_input.shape[0], dtype=torch.long).to(opts.device)
             for summand in range(opts.n_summands):
-                labels += torch.argmax(sender_input[:, summand*opts.N: (summand+1)*opts.N], dim=1)
+                labels += torch.argmax(sender_input[:, summand*(opts.N+1): (summand+1)*(opts.N+1)], dim=1)
         else:
             labels = torch.sum(sender_input, dim=1).long()
         loss = F.cross_entropy(receiver_output, labels, reduction="none")
@@ -73,10 +73,10 @@ def main(params):
     # create sender and receiver, wrap for single symbol and gumbel softmax
 
     if opts.one_hot:
-        n_features = opts.N * opts.n_summands
+        n_features = (opts.N+1) * opts.n_summands
     else:
         n_features = opts.n_summands
-    n_sums = opts.N * opts.n_summands
+    n_sums = opts.N * opts.n_summands + 1
     hidden_dim = 2 * opts.receiver_embed_dim
 
     sender = Sender(n_features, opts.n_symbols, opts.n_layers, hidden_dim)
@@ -91,11 +91,11 @@ def main(params):
 
     # generate data
 
-    full_data = enumerate_attribute_value(opts.n_summands, opts.N)
+    full_data = enumerate_attribute_value(opts.n_summands, opts.N+1)
 
     train, test = split_train_test(full_data, p_hold_out=opts.test_split)
     if opts.one_hot:
-        train, test = [one_hotify(x, opts.n_summands, opts.N) for x in [train, test]]
+        train, test = [one_hotify(x, opts.n_summands, opts.N+1) for x in [train, test]]
     else:
         train, test = (torch.Tensor(train), torch.Tensor(test))
 
