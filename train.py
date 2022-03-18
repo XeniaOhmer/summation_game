@@ -19,20 +19,21 @@ from utils.training_helpers import InteractionSaverLocal
 
 
 def get_params(params):
+    # note: passing booleans as ints to facilitate sweeps from json files
     parser = argparse.ArgumentParser()
     # data
     parser.add_argument("--n_summands", type=int, default=2, help="Number of summands")
     parser.add_argument("--N", type=int, default=20, help="Maximal value of summands")
     parser.add_argument("--test_split", type=float, default=0.1, help="proportion of test set samples")
     parser.add_argument("--data_scaling", type=int, default=50, help="number of occurrences of training samples")
-    parser.add_argument("--one_hot", type=int, default=0, help="whether data is one-hot encoded"),
+    parser.add_argument("--one_hot", type=int, default=1, help="whether data is one-hot encoded"),
     # agents and game
-    parser.add_argument("--receiver_embed_dim", type=int, default=128,
+    parser.add_argument("--receiver_embed_dim", type=int, default=64,
                         help="embedding dimension for generated symbol")
     parser.add_argument("--n_layers", type=int, default=3)
     parser.add_argument("--n_symbols", type=int, default=100, help="number of symbols")
     # training
-    parser.add_argument("--temperature", type=float, default=2.0, help="GS temperature for the sender")
+    parser.add_argument("--temperature", type=float, default=1.5, help="GS temperature for the sender")
     parser.add_argument("--temp_decay", type=float, default=1.0, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
     parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
@@ -43,13 +44,16 @@ def get_params(params):
     return args
 
 
-def run(opts, save_path):
+def main(params):
 
+    opts = get_params(params)
     opts.one_hot = bool(opts.one_hot)
     opts.save_run = bool(opts.save_run)
+
     print(opts, flush=True)
 
     if opts.save_run:
+        save_path = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
@@ -108,8 +112,9 @@ def run(opts, save_path):
     optimizer = core.build_optimizer(game.parameters())
 
     callbacks = [core.ConsoleLogger(print_train_loss=True),
-                 core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.75),
                  core.EarlyStopperAccuracy(opts.early_stopping_acc)]
+    if opts.temp_decay != 1:
+        callbacks.extend([core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.75)])
     if opts.save_run:
         callbacks.append(InteractionSaverLocal(train_epochs=[opts.n_epochs],
                                                test_epochs=[opts.n_epochs],
@@ -141,19 +146,6 @@ def run(opts, save_path):
                                                 mode='test',
                                                 epoch=opts.n_epochs,
                                                 rank=0)
-
-
-def main(params):
-
-    opts = get_params(params)
-    print(opts, flush=True)
-
-    if opts.save_run:
-        save_dir = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
-    else:
-        save_dir = None
-    for i in range(opts.n_runs):
-        run(opts, save_dir)
 
 
 if __name__ == "__main__":
