@@ -53,7 +53,7 @@ def main(params):
     print(opts, flush=True)
 
     if opts.save_run:
-        save_path = str('results_addition/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
+        save_path = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
