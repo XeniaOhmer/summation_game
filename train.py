@@ -53,7 +53,7 @@ def main(params):
     print(opts, flush=True)
 
     if opts.save_run:
-        save_path = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
+        save_path = str('results_addition/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
@@ -114,7 +114,7 @@ def main(params):
     callbacks = [core.ConsoleLogger(print_train_loss=True),
                  core.EarlyStopperAccuracy(opts.early_stopping_acc)]
     if opts.temp_decay != 1:
-        callbacks.extend([core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=0.9)])
+        callbacks.extend([core.TemperatureUpdater(agent=sender, decay=opts.temp_decay, minimum=1.35)])
     if opts.save_run:
         callbacks.append(InteractionSaverLocal(train_epochs=[opts.n_epochs],
                                                test_epochs=[opts.n_epochs],
