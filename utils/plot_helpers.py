@@ -3,7 +3,7 @@ from utils.analysis_helpers import one_hot_to_numbers
 from matplotlib import pyplot as plt
 
 
-def plot_accuracy_versus_frequency(logs):
+def plot_accuracy_versus_frequency(logs, color='blue', alpha=1.0):
 
     N = logs.sender_input.shape[1] // 2
 

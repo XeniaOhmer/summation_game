@@ -14,9 +14,9 @@ def load_interaction(N, vocab_size, mode='validation'):
 def one_hot_to_numbers(inputs):
 
     N = inputs.shape[1] // 2
-    numbers1 = inputs[:, 0: N].argmax(dim=1)
-    numbers2 = inputs[:, N: 2 * N].argmax(dim=1)
-    numbers = torch.stack([numbers1, numbers2], dim=1)
+    number1 = inputs[:, 0: N].argmax(dim=1)
+    number2 = inputs[:, N: 2 * N].argmax(dim=1)
+    numbers = torch.stack([number1, number2], dim=1)
     return numbers
 
 
@@ -70,7 +70,7 @@ def joint_entropy(xs, ys):
     return calc_entropy(xys)
 
 
-def information_scores(logs, normalizer="arithmetic"):
+def information_scores(logs):
     """calculate entropy scores: mutual information (MI), polysemy, and synonymy
     """
 
@@ -79,40 +79,34 @@ def information_scores(logs, normalizer="arithmetic"):
     messages = logs.message.argmax(dim=-1)
 
     H_sums = calc_entropy(sums)
-    H_numbers = calc_entropy(numbers)
+    H_summands = calc_entropy(numbers)
     H_messages = calc_entropy(messages)
 
     H_sums_messages = joint_entropy(sums, messages)
-    H_numbers_messages = joint_entropy(numbers, messages)
+    H_summands_messages = joint_entropy(numbers, messages)
 
-    if normalizer == "arithmetic":
-        normalizer_sums_messages = 0.5 * (H_sums + H_messages)
-        normalizer_numbers_messages = 0.5 * (H_numbers + H_messages)
-    elif normalizer == "joint":
-        normalizer_sums_messages = H_sums_messages
-        normalizer_numbers_messages = H_numbers_messages
-    else:
-        raise AttributeError("Unknown normalizer")
+    normalizer_sums_messages = 0.5 * (H_sums + H_messages)
+    normalizer_summands_messages = 0.5 * (H_summands + H_messages)
 
     # normalized mutual information
     NMI_sums_messages = (H_sums + H_messages - H_sums_messages) / normalizer_sums_messages
-    NMI_numbers_messages = (H_numbers + H_messages - H_numbers_messages) / normalizer_numbers_messages
+    NMI_summands_messages = (H_summands + H_messages - H_summands_messages) / normalizer_summands_messages
 
     # normalized conditional entropy H(input | messages) --> polysemy
-    polysemy_numbers = (H_numbers_messages - H_messages) / H_numbers
+    polysemy_summands = (H_summands_messages - H_messages) / H_summands
     polysemy_sums = (H_sums_messages - H_messages) / H_sums
 
     # normalized conditional entropy H(messages | input) --> synonymy
 
-    synonymy_numbers = (H_numbers_messages - H_numbers) / H_messages
+    synonymy_summands = (H_summands_messages - H_summands) / H_messages
     synonymy_sums = (H_sums_messages - H_sums) / H_messages
 
     score_dict = {'NMI_sum': NMI_sums_messages,
-                  'NMI_summands': NMI_numbers_messages,
+                  'NMI_summands': NMI_summands_messages,
                   'polysemy_sum': polysemy_sums,
-                  'polysemy_summands': polysemy_numbers,
+                  'polysemy_summands': polysemy_summands,
                   'synonymy_sum': synonymy_sums,
-                  'synonymy_summands': synonymy_numbers}
+                  'synonymy_summands': synonymy_summands}
 
     return score_dict
 
