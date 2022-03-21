@@ -1,5 +1,6 @@
 import os
 import torch
+import numpy as np
 from egg.core.language_analysis import calc_entropy, _hashable_tensor
 
 
@@ -106,14 +107,52 @@ def information_scores(logs, normalizer="arithmetic"):
     synonymy_numbers = (H_numbers_messages - H_numbers) / H_messages
     synonymy_sums = (H_sums_messages - H_sums) / H_messages
 
-    score_dict = {'NMI_sums': NMI_sums_messages,
-                  'NMI_numbers': NMI_numbers_messages,
-                  'polysemy_sums': polysemy_sums,
-                  'polysemy_numbers': polysemy_numbers,
-                  'synonymy_sums': synonymy_sums,
-                  'synonymy_numbers': synonymy_numbers}
+    score_dict = {'NMI_sum': NMI_sums_messages,
+                  'NMI_summands': NMI_numbers_messages,
+                  'polysemy_sum': polysemy_sums,
+                  'polysemy_summands': polysemy_numbers,
+                  'synonymy_sum': synonymy_sums,
+                  'synonymy_summands': synonymy_numbers}
 
     return score_dict
+
+
+def synonymy_dict(inputs, messages):
+
+    synonymy = {}
+
+    for i, number in enumerate(inputs):
+        key = str(number.numpy())
+        if key in synonymy.keys():
+            synonymy[key].append(messages[i].item())
+        else:
+            synonymy[key] = [messages[i].item()]
+
+    for key in synonymy.keys():
+        synonymy[key] = set(synonymy[key])
+
+    count_values = [len(val) for val in synonymy.values()]
+
+    return synonymy, np.mean(count_values), np.median(count_values)
+
+
+def polysemy_dict(inputs, messages):
+
+    polysemy = {}
+
+    for i, m in enumerate(messages):
+        key = m.item()
+        if key in polysemy.keys():
+            polysemy[key].append(str(inputs[i].numpy()))
+        else:
+            polysemy[key] = [str(inputs[i].numpy())]
+
+    for key in polysemy.keys():
+        polysemy[key] = set(polysemy[key])
+
+    count_values = [len(val) for val in polysemy.values()]
+
+    return polysemy, np.mean(count_values), np.median(count_values)
 
 
 
