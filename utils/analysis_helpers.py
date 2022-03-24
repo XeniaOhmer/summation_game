@@ -114,39 +114,45 @@ def information_scores(logs):
 def synonymy_dict(inputs, messages):
 
     synonymy = {}
+    frequency = {}
 
     for i, number in enumerate(inputs):
         key = str(number.numpy())
         if key in synonymy.keys():
-            synonymy[key].append(messages[i].item())
+            synonymy[key].append(str(messages[i].item()))
         else:
-            synonymy[key] = [messages[i].item()]
+            synonymy[key] = [str(messages[i].item())]
 
     for key in synonymy.keys():
-        synonymy[key] = set(synonymy[key])
+        values, counts = np.unique(synonymy[key], return_counts=True)
+        synonymy[key] = list(values)
+        frequency[key] = list(counts)
 
     count_values = [len(val) for val in synonymy.values()]
 
-    return synonymy, np.mean(count_values), np.median(count_values)
+    return synonymy, np.mean(count_values), frequency
 
 
 def polysemy_dict(inputs, messages):
 
     polysemy = {}
+    frequency = {}
 
     for i, m in enumerate(messages):
-        key = m.item()
+        key = str(m.item())
         if key in polysemy.keys():
             polysemy[key].append(str(inputs[i].numpy()))
         else:
             polysemy[key] = [str(inputs[i].numpy())]
 
     for key in polysemy.keys():
-        polysemy[key] = set(polysemy[key])
+        values, counts = np.unique(polysemy[key], return_counts=True)
+        polysemy[key] = list(values)
+        frequency[key] = list(counts)
 
     count_values = [len(val) for val in polysemy.values()]
 
-    return polysemy, np.mean(count_values), np.median(count_values)
+    return polysemy, np.mean(count_values), frequency
 
 
 
