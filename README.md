@@ -13,7 +13,7 @@ The folder 'grid_search/' contains the json file used to run the grid search (wi
 files recording the console output of each run, and a jupyter notebook analyzing the results: 
 'analyze_grid_search.ipynb'.
 
-The folder 'results/' contains some of the console output files for all experiments. I did not upload the interaction 
+The folder 'results/' contains the console output files for all experiments. I did not upload the interaction 
 files due to their large size, but did upload the console output. The folder also contains the json files used to run 
 the experiments (with nest_local.py): sweep_N20, sweep_N40, and sweep_N80. 
 
