@@ -14,7 +14,7 @@ files recording the console output of each run, and a jupyter notebook analyzing
 'analyze_grid_search.ipynb'.
 
 The folder 'results/' contains the console output files for all experiments. I did not upload the interaction 
-files due to their large size, but did upload the console output. The folder also contains the json files used to run 
+files due to their large size. The folder also contains the json files used to run 
 the experiments (with nest_local.py): sweep_N20, sweep_N40, and sweep_N80. 
 
 All analyses and figures in the report can be found in the notebook 'analysis.ipynb'. 
