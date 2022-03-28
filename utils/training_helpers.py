@@ -11,6 +11,7 @@ class InteractionSaverLocal(InteractionSaver):
                  ):
         super(InteractionSaverLocal, self).__init__(train_epochs, test_epochs, checkpoint_dir)
 
+    # added logic to save interactions upon early stopping
     def on_early_stopping(
         self,
         train_loss: float,
