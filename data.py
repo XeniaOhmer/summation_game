@@ -42,11 +42,11 @@ def split_train_test(dataset, N, p_hold_out=0.1, random_seed=7):
     return train, test
 
 
-def split_train_test_generalization(dataset):
+def split_train_test_generalization(dataset, N):
 
     train, hold_out = [], []
-    holdout_values_s1 = [5, 25, 45, 65]
-    holdout_values_s2 = [15, 35, 55, 75]
+    holdout_values_s1 = list(range(5, N, 20))
+    holdout_values_s2 = list(range(15, N, 20))
 
     for values in dataset:
         if values[0] in holdout_values_s1 or values[1] in holdout_values_s2:

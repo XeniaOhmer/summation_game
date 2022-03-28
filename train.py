@@ -97,7 +97,7 @@ def main(params):
     if opts.test_style == 'uniform':
         train, test = split_train_test(full_data, p_hold_out=opts.test_split)
     else:
-        train, test = split_train_test_generalization(full_data)
+        train, test = split_train_test_generalization(full_data, opts.N)
     if opts.one_hot:
         train, test = [one_hotify(x, opts.n_summands, opts.N+1) for x in [train, test]]
     else:
