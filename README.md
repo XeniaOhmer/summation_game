@@ -7,7 +7,11 @@ by using Gumbel-Softmax). Based on that symbol, the receiver tries to predict th
 s<sub>1</sub> + s<sub>2</sub>.
 
 The agents' architectures can be found in 'architectures.py' and the training procedure in 'train.py'. The latter 
-contains explanations for all command line parameters. 
+contains explanations for all command line parameters.
+
+For example, to train the agents with *N=20* and *|V|=41* using the same hyperparameters as in the report, run: 
+
+    python train.py --N 20 --n_symbols 41 --learning_rate 0.001 --n_epochs 250 
 
 The folder 'grid_search/' contains the json file used to run the grid search (with nest_local.py), as well as the text 
 files recording the console output of each run, and a jupyter notebook analyzing the results: 

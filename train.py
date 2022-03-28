@@ -1,6 +1,6 @@
 # add command line params
 # --lr: learning rate 0.001 (default: 0.01)
-# --n_epochs: 150 (default: 10)
+# --n_epochs: 250 (default: 10)
 
 import argparse
 import os
@@ -36,7 +36,6 @@ def get_params(params):
     parser.add_argument("--temperature", type=float, default=2.0, help="GS temperature for the sender")
     parser.add_argument("--temp_decay", type=float, default=0.995, help="temperature decay")
     parser.add_argument("--early_stopping_acc", type=float, default=0.99, help="accuracy for early stopping")
-    parser.add_argument("--n_runs", type=int, default=1, help="number of runs")
     parser.add_argument("--save_run", type=int, default=0,
                         help="if True: store params, interactions, and tensorboard log files")
 
