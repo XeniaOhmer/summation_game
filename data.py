@@ -23,7 +23,7 @@ def one_hotify(data, n_attributes, n_values):
     return r
 
 
-def split_train_test(dataset, N, p_hold_out=0.1, random_seed=7):
+def split_train_test(dataset, p_hold_out=0.1, random_seed=7):
 
     assert p_hold_out > 0
     random_state = np.random.RandomState(seed=random_seed)
