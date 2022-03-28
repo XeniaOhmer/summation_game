@@ -23,7 +23,7 @@ def one_hotify(data, n_attributes, n_values):
     return r
 
 
-def split_train_test(dataset, p_hold_out=0.1, random_seed=7):
+def split_train_test(dataset, N, p_hold_out=0.1, random_seed=7):
 
     assert p_hold_out > 0
     random_state = np.random.RandomState(seed=random_seed)
@@ -40,6 +40,20 @@ def split_train_test(dataset, p_hold_out=0.1, random_seed=7):
     assert len(train) + len(test) == len(dataset)
 
     return train, test
+
+
+def split_train_test_generalization(dataset):
+
+    train, hold_out = [], []
+    holdout_values_s1 = [5, 25, 45, 65]
+    holdout_values_s2 = [15, 35, 55, 75]
+
+    for values in dataset:
+        if values[0] in holdout_values_s1 or values[1] in holdout_values_s2:
+            hold_out.append(values)
+        else:
+            train.append(values)
+    return train, hold_out
 
 
 class ScaledDataset(Dataset):

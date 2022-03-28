@@ -13,7 +13,7 @@ from torch.utils.data import DataLoader
 import egg.core as core
 from egg.core.gs_wrappers import SymbolGameGS, SymbolReceiverWrapper, GumbelSoftmaxWrapper
 
-from data import ScaledDataset, enumerate_attribute_value, one_hotify, split_train_test
+from data import ScaledDataset, enumerate_attribute_value, one_hotify, split_train_test, split_train_test_generalization
 from architectures import Sender, Receiver
 from utils.training_helpers import InteractionSaverLocal
 
@@ -27,6 +27,8 @@ def get_params(params):
     parser.add_argument("--test_split", type=float, default=0.1, help="proportion of test set samples")
     parser.add_argument("--data_scaling", type=int, default=50, help="number of occurrences of training samples")
     parser.add_argument("--one_hot", type=int, default=1, help="whether data is one-hot encoded"),
+    parser.add_argument("--test_style", type=str, default='uniform',
+                        help="uniform: random split, generalization: remove some input summands entirely")
     # agents and game
     parser.add_argument("--receiver_embed_dim", type=int, default=64,
                         help="embedding dimension for generated symbol")
@@ -52,7 +54,7 @@ def main(params):
     print(opts, flush=True)
 
     if opts.save_run:
-        save_path = str('results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
+        save_path = str('results_alt_splits/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/')
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
@@ -92,7 +94,10 @@ def main(params):
 
     full_data = enumerate_attribute_value(opts.n_summands, opts.N+1)
 
-    train, test = split_train_test(full_data, p_hold_out=opts.test_split)
+    if opts.test_style == 'uniform':
+        train, test = split_train_test(full_data, p_hold_out=opts.test_split)
+    else:
+        train, test = split_train_test_generalization(full_data)
     if opts.one_hot:
         train, test = [one_hotify(x, opts.n_summands, opts.N+1) for x in [train, test]]
     else:
