@@ -1,7 +1,3 @@
-# add command line params
-# --lr: learning rate 0.001 (default: 0.01)
-# --n_epochs: 250 (default: 10)
-
 import argparse
 import os
 import pickle
@@ -19,7 +15,13 @@ from utils.training_helpers import InteractionSaverLocal
 
 
 def get_params(params):
-    # note: passing booleans as ints to facilitate sweeps from json files
+
+    # note:
+    # + passing booleans as ints to facilitate sweeps from json files
+    # + add command line params
+    #   --lr: learning rate 0.001 (default: 0.01)
+    #   --n_epochs: 250 (default: 10)
+
     parser = argparse.ArgumentParser()
     # data
     parser.add_argument("--n_summands", type=int, default=2, help="Number of summands")
@@ -52,7 +54,7 @@ def main(params):
     print(opts, flush=True)
 
     if opts.save_run:
-        save_path = 'results_alt_splits/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/'
+        save_path = 'results/N' + str(opts.N) + '_vocab-size' + str(opts.n_symbols) + '/'
         if not os.path.exists(save_path):
             os.makedirs(save_path)
         pickle.dump(opts, open(save_path + 'params.pkl', 'wb'))
@@ -118,7 +120,6 @@ def main(params):
         callbacks.append(InteractionSaverLocal(train_epochs=[opts.n_epochs],
                                                test_epochs=[opts.n_epochs],
                                                checkpoint_dir=save_path))
-        # this creates a new writer for each run
         from torch.utils.tensorboard import SummaryWriter
         summary_writer = SummaryWriter(log_dir=save_path)
         callbacks.append(core.callbacks.TensorboardLogger(writer=summary_writer))
