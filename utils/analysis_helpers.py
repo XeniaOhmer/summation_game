@@ -4,8 +4,8 @@ import numpy as np
 from egg.core.language_analysis import calc_entropy, _hashable_tensor
 
 
-def load_interaction(N, vocab_size, mode='validation'):
-    path = 'results/N' + str(N) + '_vocab-size' + str(vocab_size) + '/interactions/' + mode + '/'
+def load_interaction(N, vocab_size, mode='validation', name_addition=''):
+    path = 'results/N' + str(N) + '_vocab-size' + str(vocab_size) + name_addition + '/interactions/' + mode + '/'
     folder = os.listdir(path)[0]
     logs = torch.load(path + folder + '/interaction_gpu0')
     return logs
