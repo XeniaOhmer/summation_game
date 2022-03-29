@@ -42,20 +42,6 @@ def split_train_test(dataset, p_hold_out=0.1, random_seed=7):
     return train, test
 
 
-def split_train_test_generalization(dataset, N):
-
-    train, hold_out = [], []
-    holdout_values_s1 = list(range(5, N, 20))
-    holdout_values_s2 = list(range(15, N, 20))
-
-    for values in dataset:
-        if values[0] in holdout_values_s1 or values[1] in holdout_values_s2:
-            hold_out.append(values)
-        else:
-            train.append(values)
-    return train, hold_out
-
-
 class ScaledDataset(Dataset):
     def __init__(self, examples, scaling_factor=1):
         self.examples = examples
