@@ -19,7 +19,7 @@ files recording the console output of each run, and a jupyter notebook analyzing
 
 The folder 'results/' contains the console output files for all experiments. I did not upload the interaction 
 files due to their large size. The folder also contains the json files used to run 
-the experiments (with nest_local.py): sweep_N20, sweep_N40, and sweep_N80. 
+the experiments (with nest_local.py): sweep_N20, sweep_N40, and sweep_N80, plus sweep_N80_alt_splits (for the experiments with different train/test ratios).
 
 All analyses and figures in the report can be found in the notebook 'analysis.ipynb'. 
 
